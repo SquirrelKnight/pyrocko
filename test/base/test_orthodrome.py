@@ -514,6 +514,42 @@ class OrthodromeTestCase(unittest.TestCase):
         for point, region, in_region in testdata:
             assert bool(orthodrome.point_in_region(point, region)) == in_region
 
+    def test_track_distance(self):
+        start = (0., 0.)
+        end = (0., 1.)
+        point = (0., 1.)
+
+        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        assert distance == 0.
+
+        point = (0., 0.)
+        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        assert distance == 0.
+
+        point = (0., .5)
+        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        assert distance == 0.
+
+        point = (1., 0.)
+        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        num.testing.assert_almost_equal(abs(distance), 1.)
+
+        point = (1., .5)
+        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        num.testing.assert_almost_equal(abs(distance), 1.)
+
+        point = (1., .5)
+        distance = orthodrome.alongtrack_distance(*start, *end, *point)
+        num.testing.assert_almost_equal(abs(distance), .5)
+
+        point = (1., .5)
+        distance = orthodrome.alongtrack_distance_m(*start, *end, *point)
+        num.testing.assert_almost_equal(
+            abs(distance),
+            orthodrome.distance_accurate50m(
+                orthodrome.Loc(*start), orthodrome.Loc(0., .5))
+        )
+
 
 def serialgrid(x, y):
     return num.repeat(x, y.size), num.tile(y, x.size)

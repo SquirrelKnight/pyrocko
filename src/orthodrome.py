@@ -4,6 +4,7 @@
 # ---|P------/S----------~Lg----------
 from __future__ import division, absolute_import
 
+from functools import wraps, lru_cache
 import math
 import numpy as num
 
@@ -72,6 +73,8 @@ class Loc(object):
     :attrib lat: Latitude in [deg].
     :attrib lon: Longitude in [deg].
     '''
+    __slots__ = ['lat', 'lon']
+
     def __init__(self, lat, lon):
         self.lat = lat
         self.lon = lon
@@ -128,6 +131,7 @@ def _latlon_pair(args):
         return args
 
 
+@lru_cache
 def cosdelta(*args):
     '''
     Cosine of the angular distance between two points ``a`` and ``b`` on a
@@ -201,6 +205,7 @@ def cosdelta_numpy(a_lats, a_lons, b_lats, b_lons):
         num.cos(d2r*(b_lons-a_lons)))
 
 
+@lru_cache
 def azimuth(*args):
     '''
     Azimuth calculation.
@@ -273,6 +278,7 @@ def azimuth_numpy(a_lats, a_lons, b_lats, b_lons, _cosdelta=None):
         num.sin(d2r*b_lats) - num.sin(d2r*a_lats) * _cosdelta)
 
 
+@lru_cache
 def azibazi(*args, **kwargs):
     '''
     Azimuth and backazimuth from location A towards B and back.
@@ -727,6 +733,109 @@ def azidist_to_latlon_rad(lat0, lon0, azimuth_rad, distance_rad):
     return lat, lon
 
 
+def crosstrack_distance(lat_start, lon_start, lat_end, lon_end,
+                        lat_point, lon_point):
+    '''Calculate distance of a point to a great-circle path.
+
+    The sign of the results shows side of the path the point is on.
+
+    .. math ::
+        d_{xt} = asin(sin(\\Delta_{13}) * \\\\
+            sin(\\gamma_{13} - \\gamma_{{12}})) * R
+
+    :param lat_start: Latitude of the great circle start.
+    :param lon_start: Longitude of the great circle start.
+    :param lat_end: Latitude of the great circle end.
+    :param lon_end: Longitude of the great circle end.
+    :param lat_point: Latitude of the point.
+    :param lon_point: Longitude of the point.
+    :type lat_start: float
+    :type lon_start: float
+    :type lat_end: float
+    :type lon_end: float
+    :type lat_point: float
+    :type lon_point: float
+
+    :return: Distance of the point to the great-circle path in [deg].
+    :rtype: float
+    '''
+    start = Loc(lat_start, lon_start)
+    end = Loc(lat_end, lon_end)
+    point = Loc(lat_point, lon_point)
+
+    dist_ang = math.acos(cosdelta(start, point))
+    azi_point = azimuth(start, point) * d2r
+    azi_end = azimuth(start, end) * d2r
+
+    return math.asin(math.sin(dist_ang) * math.sin(azi_point - azi_end)) * r2d
+
+
+def alongtrack_distance(lat_start, lon_start, lat_end, lon_end,
+                        lat_point, lon_point):
+    '''Calculate distance of a point along a great-circle path.
+
+    .. math ::
+        d_{At} = acos(cos(\\Delta_{13}) * cos(\\Delta_xt{13}))
+
+    :param lat_start: Latitude of the great circle start.
+    :param lon_start: Longitude of the great circle start.
+    :param lat_end: Latitude of the great circle end.
+    :param lon_end: Longitude of the great circle end.
+    :param lat_point: Latitude of the point.
+    :param lon_point: Longitude of the point.
+    :type lat_start: float
+    :type lon_start: float
+    :type lat_end: float
+    :type lon_end: float
+    :type lat_point: float
+    :type lon_point: float
+
+    :return: Distance of the point along the great-circle path in [deg].
+    :rtype: float
+    '''
+    start = Loc(lat_start, lon_start)
+    point = Loc(lat_point, lon_point)
+    cos_dist_ang = cosdelta(start, point)
+    dist_rad = crosstrack_distance(
+        lat_start, lon_start, lat_end, lon_end, lat_point, lon_point) * d2r
+    return math.acos(cos_dist_ang / math.cos(dist_rad)) * r2d
+
+
+def alongtrack_distance_m(lat_start, lon_start, lat_end, lon_end,
+                          lat_point, lon_point):
+    '''Calculate distance of a point along a great-circle path in [m].
+
+    .. math ::
+        d_{At} = acos(cos(\\Delta_{13}) * cos(\\Delta_xt{13}))
+
+    :param lat_start: Latitude of the great circle start.
+    :param lon_start: Longitude of the great circle start.
+    :param lat_end: Latitude of the great circle end.
+    :param lon_end: Longitude of the great circle end.
+    :param lat_point: Latitude of the point.
+    :param lon_point: Longitude of the point.
+    :type lat_start: float
+    :type lon_start: float
+    :type lat_end: float
+    :type lon_end: float
+    :type lat_point: float
+    :type lon_point: float
+
+    :return: Distance of the point along the great-circle path in [m].
+    :rtype: float
+    '''
+    start = Loc(lat_start, lon_start)
+    end = Loc(lat_end, lon_end)
+    azi_end = azimuth(start, end)
+    dist_deg = alongtrack_distance(
+        lat_start, lon_start, lat_end, lon_end,
+        lat_point, lon_point)
+    along_point = Loc(
+        *azidist_to_latlon(lat_start, lon_start, azi_end, dist_deg))
+
+    return distance_accurate50m(start, along_point)
+
+
 def ne_to_latlon_alternative_method(lat0, lon0, north_m, east_m):
     '''
     Transform local cartesian coordinates to latitude and longitude.
@@ -911,8 +1020,10 @@ def get_wgs84():
 
 
 def amap(n):
+
     def wrap(f):
         if n == 1:
+            @wraps(f)
             def func(*args):
                 it = num.nditer(args + (None,))
                 for ops in it:
@@ -920,12 +1031,15 @@ def amap(n):
 
                 return it.operands[-1]
         elif n == 2:
+            @wraps(f)
             def func(*args):
                 it = num.nditer(args + (None, None))
                 for ops in it:
                     ops[-2][...], ops[-1][...] = f(*ops[:-2])
 
                 return it.operands[-2], it.operands[-1]
+        else:
+            raise ValueError("Cannot wrap %s" % f.__qualname__)
 
         return func
     return wrap

@@ -2,13 +2,13 @@
 #
 # The Pyrocko Developers, 21st Century
 # ---|P------/S----------~Lg----------
+from __future__ import annotations
 
-import numpy as num
 import math
 
+import numpy as num
 from pyrocko import orthodrome
-from pyrocko.guts import Object, Float
-
+from pyrocko.guts import Float, Object
 
 guts_prefix = 'pf'
 
@@ -113,8 +113,6 @@ class Location(Object):
     def distance_to(self, other):
         '''
         Compute surface distance [m] to other location object.
-
-
         '''
 
         if self.same_origin(other):
@@ -158,6 +156,16 @@ class Location(Object):
             rx, ry, rz = latlondepth_to_cartesian(rlat, rlon, other.depth)
 
             return math.sqrt((sx-rx)**2 + (sy-ry)**2 + (sz-rz)**2)
+
+    def crosstrack_distance_to(self, path_start, path_end):
+        '''
+        Compute distance to a great-circle arc.
+        '''
+        return orthodrome.crosstrack_distance(
+            *path_start.effective_latlon,
+            *path_end.effective_latlon,
+            *self.effective_latlon
+        )
 
     def offset_to(self, other):
         if self.same_origin(other):
@@ -204,6 +212,86 @@ class Location(Object):
     def coords5(self):
         return num.array([
             self.lat, self.lon, self.north_shift, self.east_shift, self.depth])
+
+
+def filter_azimuths(
+    locations: list[Location],
+    center: Location,
+    azimuth: float,
+    azimuth_width: float,
+) -> list[Location]:
+    """Filter locations by azimuth swath.
+
+    Args:
+        locations (list[Location]): List of Locations
+        center (Location): Relative center location.
+        azimuth (float): Azimuth in [deg]. -180 to 180 or 0 to 360.
+        azimuth_width (float): Width of the swath.
+
+    Returns:
+        list[Location]: Filtered locations.
+    """
+    OFFSET = 720.0
+    filt_locations = []
+
+    azimuth_min = azimuth + OFFSET - azimuth_width
+    azimuth_max = azimuth + OFFSET + azimuth_width
+    for loc in locations:
+        azimuth, _ = center.azibazi_to(loc)
+        if (azimuth_min <= azimuth + OFFSET <= azimuth_max) or (
+            azimuth_min <= azimuth % 360.0 + OFFSET <= azimuth_max
+        ):
+            filt_locations.append(loc)
+    return filt_locations
+
+
+def filter_distance(
+    locations: list[Location],
+    reference: Location,
+    distance_min: float,
+    distance_max: float,
+) -> list[Location]:
+    """Filter location by distance to a reference point.
+
+    Args:
+        locations (list[Location]): Locations to filter.
+        reference (Location): Reference location.
+        distance_min (float): Minimum distance in [m].
+        distance_max (float): Maximum distance in [m].
+
+    Returns:
+        list[Location]: Filtered locations.
+    """
+    return [
+        loc
+        for loc in locations
+        if distance_min <= loc.distance_to(reference) <= distance_max
+    ]
+
+
+def filter_crosstrack_distance(
+    locations: list[Location],
+    start_path: Location,
+    end_path: Location,
+    distance_max: float
+) -> list[Location]:
+    """Filter location by distance to a great-circle path.
+
+    Args:
+        locations (list[Location]): Locations to filter.
+        start_path (Location): Start of the great circle path.
+        end_path (Location): End of the great circle path.
+        distance_max (float): Distance to the great-circle in [deg].
+
+    Returns:
+        list[Location]: Filtered locations.
+    """
+    return [
+        loc
+        for loc in locations
+        if abs(loc.crosstrack_distance_to(
+            start_path, end_path)) <= distance_max
+    ]
 
 
 def get_offset(obj):
