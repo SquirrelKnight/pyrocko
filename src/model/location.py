@@ -113,6 +113,12 @@ class Location(Object):
     def distance_to(self, other):
         '''
         Compute surface distance [m] to other location object.
+
+        :param other: Other location.
+        :type other: :py:class:`~pyrocko.model.location.Location`
+
+        :return: Distance to another location in [m].
+        :rtype: float
         '''
 
         if self.same_origin(other):
@@ -140,6 +146,11 @@ class Location(Object):
             \\Delta = \\sqrt{\\Delta {\\bf x}^2 + \\Delta {\\bf y}^2 + \
                       \\Delta {\\bf z}^2}
 
+        :param other: Other location.
+        :type other: :py:class:`~pyrocko.model.location.Location`
+
+        :return: 3D distance to another location in [m].
+        :rtype: float
         '''
 
         if self.same_origin(other):
@@ -157,12 +168,46 @@ class Location(Object):
 
             return math.sqrt((sx-rx)**2 + (sy-ry)**2 + (sz-rz)**2)
 
-    def crosstrack_distance_to(self, path_start, path_end):
+    def crosstrack_distance_to(self, path_begin, path_end):
         '''
         Compute distance to a great-circle arc.
+
+        :param path_begin: Location of the start of the arc.
+        :param path_end: Location of the end of the arc.
+        :type path_begin: :py:class:`~pyrocko.model.location.Location`
+        :type path_end: :py:class:`~pyrocko.model.location.Location`
+
+        :return: Distance to a great circle arc in [deg].
+        :rtype: float
         '''
         return orthodrome.crosstrack_distance(
-            *path_start.effective_latlon,
+            *path_begin.effective_latlon,
+            *path_end.effective_latlon,
+            *self.effective_latlon
+        )
+
+    def alongtrack_distance_to(self, path_begin, path_end, meter=False):
+        '''
+        Compute distance along a great-circle arc.
+
+        :param path_begin: Location of the start of the arc.
+        :param path_end: Location of the end of the arc.
+        :param meter: Return [m] instead of [deg].
+        :type path_begin: :py:class:`~pyrocko.model.location.Location`
+        :type path_end: :py:class:`~pyrocko.model.location.Location`
+
+        :return: Distance from the start of the great circle arc
+            in [deg] or [m].
+        :rtype: float
+        '''
+        if meter:
+            return orthodrome.alongtrack_distance_m(
+                *path_begin.effective_latlon,
+                *path_end.effective_latlon,
+                *self.effective_latlon
+            )
+        return orthodrome.alongtrack_distance(
+            *path_begin.effective_latlon,
             *path_end.effective_latlon,
             *self.effective_latlon
         )
@@ -182,6 +227,12 @@ class Location(Object):
     def azibazi_to(self, other):
         '''
         Compute azimuth and backazimuth to and from other location object.
+
+        :param other: Other location.
+        :type other: :py:class:`~pyrocko.model.location.Location`
+
+        :return: Azimuth and back-azimuth to the location in [deg].
+        :rtype: tuple[float, float]
         '''
 
         if self.same_origin(other):
@@ -223,7 +274,7 @@ def filter_azimuths(
     """Filter locations by azimuth swath.
 
     Args:
-        locations (list[Location]): List of Locations
+        locations (list[Location]): List of Locations.
         center (Location): Relative center location.
         azimuth (float): Azimuth in [deg]. -180 to 180 or 0 to 360.
         azimuth_width (float): Width of the swath.
