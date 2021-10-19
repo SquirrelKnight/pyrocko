@@ -774,7 +774,7 @@ def crosstrack_distance(lat_begin, lon_begin, lat_end, lon_end,
 
 def alongtrack_distance(lat_begin, lon_begin, lat_end, lon_end,
                         lat_point, lon_point):
-    '''Calculate distance of a point along a great-circle path.
+    '''Calculate distance of a point along a great-circle path in [deg].
 
     Distance is relative to the beginning of the path.
 
@@ -809,6 +809,8 @@ def alongtrack_distance(lat_begin, lon_begin, lat_end, lon_end,
 def alongtrack_distance_m(lat_begin, lon_begin, lat_end, lon_end,
                           lat_point, lon_point):
     '''Calculate distance of a point along a great-circle path in [m].
+
+    Distance is relative to the beginning of the path.
 
     .. math ::
 
