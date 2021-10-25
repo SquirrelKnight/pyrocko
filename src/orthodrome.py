@@ -742,8 +742,8 @@ def crosstrack_distance(lat_begin, lon_begin, lat_end, lon_end,
 
     .. math ::
 
-        d_{xt} = \\arcsin{\\sin{\\Delta_{13}} * \\\\
-            \\sin{\\gamma_{13} - \\gamma_{{12}}}}
+        d_{xt} = \\arcsin \\left \\sin \\left \\Delta_{13} \\right *
+            \\sin \\left \\gamma_{13} - \\gamma_{12} \\right \\right
 
     :param lat_begin: Latitude of the great circle start in [deg].
     :param lon_begin: Longitude of the great circle start in [deg].
@@ -780,7 +780,8 @@ def alongtrack_distance(lat_begin, lon_begin, lat_end, lon_end,
 
     .. math ::
 
-        d_{At} = \\arccos{\\cos{\\Delta_{13}} / \\cos{\\Delta_xt{13}}}
+        d_{At} = \\arccos \\left \\frac{\\cos \\left \\Delta_{13} \\right}
+            {\\cos \\left \\Delta_{xt}} \\right} \\right
 
     :param lat_begin: Latitude of the great circle start in [deg].
     :param lon_begin: Longitude of the great circle start in [deg].
@@ -814,7 +815,8 @@ def alongtrack_distance_m(lat_begin, lon_begin, lat_end, lon_end,
 
     .. math ::
 
-        d_{At} = \\arccos{\\cos{\\Delta_{13}} / \\cos{\\Delta_xt{13}}}
+        d_{At} = \\arccos \\left \\frac{\\cos \\left \\Delta_{13} \\right }
+            { \\cos \\left \\Delta_{xt} \\right} \\right
 
     :param lat_begin: Latitude of the great circle start in [deg].
     :param lon_begin: Longitude of the great circle start in [deg].
