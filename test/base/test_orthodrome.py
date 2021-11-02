@@ -519,31 +519,38 @@ class OrthodromeTestCase(unittest.TestCase):
         end = (0., 1.)
         point = (0., 1.)
 
-        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        distance = orthodrome.crosstrack_distance(
+            start[0], start[1], end[0], end[1], point[0], point[1])
         assert distance == 0.
 
         point = (0., 0.)
-        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        distance = orthodrome.crosstrack_distance(
+            start[0], start[1], end[0], end[1], point[0], point[1])
         assert distance == 0.
 
         point = (0., .5)
-        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        distance = orthodrome.crosstrack_distance(
+            start[0], start[1], end[0], end[1], point[0], point[1])
         assert distance == 0.
 
         point = (1., 0.)
-        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        distance = orthodrome.crosstrack_distance(
+            start[0], start[1], end[0], end[1], point[0], point[1])
         num.testing.assert_almost_equal(abs(distance), 1.)
 
         point = (1., .5)
-        distance = orthodrome.crosstrack_distance(*start, *end, *point)
+        distance = orthodrome.crosstrack_distance(
+            start[0], start[1], end[0], end[1], point[0], point[1])
         num.testing.assert_almost_equal(abs(distance), 1.)
 
         point = (1., .5)
-        distance = orthodrome.alongtrack_distance(*start, *end, *point)
+        distance = orthodrome.alongtrack_distance(
+            start[0], start[1], end[0], end[1], point[0], point[1])
         num.testing.assert_almost_equal(abs(distance), .5)
 
         point = (1., .5)
-        distance = orthodrome.alongtrack_distance_m(*start, *end, *point)
+        distance = orthodrome.alongtrack_distance_m(
+            start[0], start[1], end[0], end[1], point[0], point[1])
         num.testing.assert_almost_equal(
             abs(distance),
             orthodrome.distance_accurate50m(

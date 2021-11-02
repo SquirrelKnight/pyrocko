@@ -4,7 +4,7 @@
 # ---|P------/S----------~Lg----------
 from __future__ import division, absolute_import
 
-from functools import wraps, lru_cache
+from functools import wraps
 import math
 import numpy as num
 
@@ -131,7 +131,6 @@ def _latlon_pair(args):
         return args
 
 
-@lru_cache
 def cosdelta(*args):
     '''
     Cosine of the angular distance between two points ``a`` and ``b`` on a
@@ -205,7 +204,6 @@ def cosdelta_numpy(a_lats, a_lons, b_lats, b_lons):
         num.cos(d2r*(b_lons-a_lons)))
 
 
-@lru_cache
 def azimuth(*args):
     '''
     Azimuth calculation.
@@ -256,7 +254,6 @@ def azimuth_numpy(a_lats, a_lons, b_lats, b_lons, _cosdelta=None):
     Please find the details of the implementation in the documentation of the
     function :py:func:`pyrocko.orthodrome.azimuth`.
 
-
     :param a_lats: Latitudes in [deg] point A.
     :param a_lons: Longitudes in [deg] point A.
     :param b_lats: Latitudes in [deg] point B.
@@ -278,7 +275,6 @@ def azimuth_numpy(a_lats, a_lons, b_lats, b_lons, _cosdelta=None):
         num.sin(d2r*b_lats) - num.sin(d2r*a_lats) * _cosdelta)
 
 
-@lru_cache
 def azibazi(*args, **kwargs):
     '''
     Azimuth and backazimuth from location A towards B and back.
@@ -733,8 +729,8 @@ def azidist_to_latlon_rad(lat0, lon0, azimuth_rad, distance_rad):
     return lat, lon
 
 
-def crosstrack_distance(lat_begin, lon_begin, lat_end, lon_end,
-                        lat_point, lon_point):
+def crosstrack_distance(begin_lat, begin_lon, end_lat, end_lon,
+                        point_lat, point_lon):
     '''Calculate distance of a point to a great-circle path.
 
     The sign of the results shows side of the path the point is on. Negative
@@ -745,25 +741,25 @@ def crosstrack_distance(lat_begin, lon_begin, lat_end, lon_end,
         d_{xt} = \\arcsin \\left( \\sin \\left( \\Delta_{13} \\right) \\cdot
             \\sin \\left( \\gamma_{13} - \\gamma_{12} \\right) \\right)
 
-    :param lat_begin: Latitude of the great circle start in [deg].
-    :param lon_begin: Longitude of the great circle start in [deg].
-    :param lat_end: Latitude of the great circle end in [deg].
-    :param lon_end: Longitude of the great circle end in [deg].
-    :param lat_point: Latitude of the point in [deg].
-    :param lon_point: Longitude of the point in [deg].
-    :type lat_begin: float
-    :type lon_begin: float
-    :type lat_end: float
-    :type lon_end: float
-    :type lat_point: float
-    :type lon_point: float
+    :param begin_lat: Latitude of the great circle start in [deg].
+    :param begin_lon: Longitude of the great circle start in [deg].
+    :param end_lat: Latitude of the great circle end in [deg].
+    :param end_lon: Longitude of the great circle end in [deg].
+    :param point_lat: Latitude of the point in [deg].
+    :param point_lon: Longitude of the point in [deg].
+    :type begin_lat: float
+    :type begin_lon: float
+    :type end_lat: float
+    :type end_lon: float
+    :type point_lat: float
+    :type point_lon: float
 
     :return: Distance of the point to the great-circle path in [deg].
     :rtype: float
     '''
-    start = Loc(lat_begin, lon_begin)
-    end = Loc(lat_end, lon_end)
-    point = Loc(lat_point, lon_point)
+    start = Loc(begin_lat, begin_lon)
+    end = Loc(end_lat, end_lon)
+    point = Loc(point_lat, point_lon)
 
     dist_ang = math.acos(cosdelta(start, point))
     azi_point = azimuth(start, point) * d2r
@@ -772,8 +768,8 @@ def crosstrack_distance(lat_begin, lon_begin, lat_end, lon_end,
     return math.asin(math.sin(dist_ang) * math.sin(azi_point - azi_end)) * r2d
 
 
-def alongtrack_distance(lat_begin, lon_begin, lat_end, lon_end,
-                        lat_point, lon_point):
+def alongtrack_distance(begin_lat, begin_lon, end_lat, end_lon,
+                        point_lat, point_lon):
     '''Calculate distance of a point along a great-circle path in [deg].
 
     Distance is relative to the beginning of the path.
@@ -783,32 +779,32 @@ def alongtrack_distance(lat_begin, lon_begin, lat_end, lon_end,
         d_{At} = \\arccos \\left( \\frac{\\cos \\left( \\Delta_{13} \\right)}
             {\\cos \\left( \\Delta_{xt} \\right) } \\right)
 
-    :param lat_begin: Latitude of the great circle start in [deg].
-    :param lon_begin: Longitude of the great circle start in [deg].
-    :param lat_end: Latitude of the great circle end in [deg].
-    :param lon_end: Longitude of the great circle end in [deg].
-    :param lat_point: Latitude of the point in [deg].
-    :param lon_point: Longitude of the point in [deg].
-    :type lat_begin: float
-    :type lon_begin: float
-    :type lat_end: float
-    :type lon_end: float
-    :type lat_point: float
-    :type lon_point: float
+    :param begin_lat: Latitude of the great circle start in [deg].
+    :param begin_lon: Longitude of the great circle start in [deg].
+    :param end_lat: Latitude of the great circle end in [deg].
+    :param end_lon: Longitude of the great circle end in [deg].
+    :param point_lat: Latitude of the point in [deg].
+    :param point_lon: Longitude of the point in [deg].
+    :type begin_lat: float
+    :type begin_lon: float
+    :type end_lat: float
+    :type end_lon: float
+    :type point_lat: float
+    :type point_lon: float
 
     :return: Distance of the point along the great-circle path in [deg].
     :rtype: float
     '''
-    start = Loc(lat_begin, lon_begin)
-    point = Loc(lat_point, lon_point)
+    start = Loc(begin_lat, begin_lon)
+    point = Loc(point_lat, point_lon)
     cos_dist_ang = cosdelta(start, point)
     dist_rad = crosstrack_distance(
-        lat_begin, lon_begin, lat_end, lon_end, lat_point, lon_point) * d2r
+        begin_lat, begin_lon, end_lat, end_lon, point_lat, point_lon) * d2r
     return math.acos(cos_dist_ang / math.cos(dist_rad)) * r2d
 
 
-def alongtrack_distance_m(lat_begin, lon_begin, lat_end, lon_end,
-                          lat_point, lon_point):
+def alongtrack_distance_m(begin_lat, begin_lon, end_lat, end_lon,
+                          point_lat, point_lon):
     '''Calculate distance of a point along a great-circle path in [m].
 
     Distance is relative to the beginning of the path.
@@ -818,30 +814,30 @@ def alongtrack_distance_m(lat_begin, lon_begin, lat_end, lon_end,
         d_{At} = \\arccos \\left( \\frac{\\cos \\left( \\Delta_{13} \\right)}
             {\\cos \\left( \\Delta_{xt} \\right) } \\right)
 
-    :param lat_begin: Latitude of the great circle start in [deg].
-    :param lon_begin: Longitude of the great circle start in [deg].
-    :param lat_end: Latitude of the great circle end in [deg].
-    :param lon_end: Longitude of the great circle end in [deg].
-    :param lat_point: Latitude of the point in [deg].
-    :param lon_point: Longitude of the point in [deg].
-    :type lat_begin: float
-    :type lon_begin: float
-    :type lat_end: float
-    :type lon_end: float
-    :type lat_point: float
-    :type lon_point: float
+    :param begin_lat: Latitude of the great circle start in [deg].
+    :param begin_lon: Longitude of the great circle start in [deg].
+    :param end_lat: Latitude of the great circle end in [deg].
+    :param end_lon: Longitude of the great circle end in [deg].
+    :param point_lat: Latitude of the point in [deg].
+    :param point_lon: Longitude of the point in [deg].
+    :type begin_lat: float
+    :type begin_lon: float
+    :type end_lat: float
+    :type end_lon: float
+    :type point_lat: float
+    :type point_lon: float
 
     :return: Distance of the point along the great-circle path in [m].
     :rtype: float
     '''
-    start = Loc(lat_begin, lon_begin)
-    end = Loc(lat_end, lon_end)
+    start = Loc(begin_lat, begin_lon)
+    end = Loc(end_lat, end_lon)
     azi_end = azimuth(start, end)
     dist_deg = alongtrack_distance(
-        lat_begin, lon_begin, lat_end, lon_end,
-        lat_point, lon_point)
+        begin_lat, begin_lon, end_lat, end_lon,
+        point_lat, point_lon)
     along_point = Loc(
-        *azidist_to_latlon(lat_begin, lon_begin, azi_end, dist_deg))
+        *azidist_to_latlon(begin_lat, begin_lon, azi_end, dist_deg))
 
     return distance_accurate50m(start, along_point)
 
@@ -939,6 +935,18 @@ def ne_to_latlon_alternative_method(lat0, lon0, north_m, east_m):
     lat = r2d * (math.pi/2. - c)
     lon = wrap(lon0 + r2d*alpha*alphasign, -180., 180.)
     return lat, lon
+
+
+def angle_difference(angle_a, angle_b):
+    '''Difference between two angles in [deg].
+
+    :param angle_a: Angle A [deg].
+    :param angle_b: Angle B [deg].
+
+    :return: Difference between the two angles in [deg].
+    :rtype: float
+    '''
+    return ((angle_a - angle_b) + 180.) % 360. + 180.
 
 
 def latlon_to_ne(*args):

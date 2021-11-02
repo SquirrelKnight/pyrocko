@@ -2,8 +2,6 @@
 #
 # The Pyrocko Developers, 21st Century
 # ---|P------/S----------~Lg----------
-from __future__ import annotations
-
 import math
 
 import numpy as num
@@ -181,9 +179,9 @@ class Location(Object):
         :rtype: float
         '''
         return orthodrome.crosstrack_distance(
-            *path_begin.effective_latlon,
-            *path_end.effective_latlon,
-            *self.effective_latlon
+            path_begin.effective_latlon[0], path_begin.effective_latlon[1],
+            path_end.effective_latlon[0], path_end.effective_latlon[1],
+            self.effective_latlon[0], self.effective_latlon[1]
         )
 
     def alongtrack_distance_to(self, path_begin, path_end, meter=False):
@@ -200,16 +198,14 @@ class Location(Object):
             in [deg] or [m].
         :rtype: float
         '''
+        func = orthodrome.alongtrack_distance
         if meter:
-            return orthodrome.alongtrack_distance_m(
-                *path_begin.effective_latlon,
-                *path_end.effective_latlon,
-                *self.effective_latlon
-            )
-        return orthodrome.alongtrack_distance(
-            *path_begin.effective_latlon,
-            *path_end.effective_latlon,
-            *self.effective_latlon
+            func = orthodrome.alongtrack_distance_m
+
+        return func(
+            path_begin.effective_latlon[0], path_begin.effective_latlon[1],
+            path_end.effective_latlon[0], path_end.effective_latlon[1],
+            self.effective_latlon[0], self.effective_latlon[1]
         )
 
     def offset_to(self, other):
@@ -265,53 +261,44 @@ class Location(Object):
             self.lat, self.lon, self.north_shift, self.east_shift, self.depth])
 
 
-def filter_azimuths(
-    locations: list[Location],
-    center: Location,
-    azimuth: float,
-    azimuth_width: float,
-) -> list[Location]:
-    """Filter locations by azimuth swath.
+def filter_azimuths(locations, center, azimuth, azimuth_width):
+    """Filter locations by azimuth swath from a center location.
 
-    Args:
-        locations (list[Location]): List of Locations.
-        center (Location): Relative center location.
-        azimuth (float): Azimuth in [deg]. -180 to 180 or 0 to 360.
-        azimuth_width (float): Width of the swath.
+    :param locations:ocation]): List of Locations.
+    :param center: Relative center location.
+    :param azimuth: Azimuth in [deg]. -180 to 180 or 0 to 360.
+    :param azimuth_width: Width of the swath.
+    :type locations: list
+    :type center: Location
+    :type azimuth: float
+    :type azimuth_width: float
 
-    Returns:
-        list[Location]: Filtered locations.
+    :return: Filtered locations.
+    :rtype: list[Location]
     """
-    OFFSET = 720.0
     filt_locations = []
-
-    azimuth_min = azimuth + OFFSET - azimuth_width
-    azimuth_max = azimuth + OFFSET + azimuth_width
     for loc in locations:
-        azimuth, _ = center.azibazi_to(loc)
-        if (azimuth_min <= azimuth + OFFSET <= azimuth_max) or (
-            azimuth_min <= azimuth % 360.0 + OFFSET <= azimuth_max
-        ):
+        loc_azi, _ = center.azibazi_to(loc)
+        angle = orthodrome.angle_difference(loc_azi, azimuth)
+        if abs(angle) <= azimuth_width / 2.:
             filt_locations.append(loc)
     return filt_locations
 
 
-def filter_distance(
-    locations: list[Location],
-    reference: Location,
-    distance_min: float,
-    distance_max: float,
-) -> list[Location]:
+def filter_distance(locations, reference, distance_min, distance_max):
     """Filter location by distance to a reference point.
 
-    Args:
-        locations (list[Location]): Locations to filter.
-        reference (Location): Reference location.
-        distance_min (float): Minimum distance in [m].
-        distance_max (float): Maximum distance in [m].
+    :param locations: Locations to filter.
+    :param reference: Reference location.
+    :param distance_min: Minimum distance in [m].
+    :param distance_max: Maximum distance in [m].
+    :type locations: list
+    :type reference: Location
+    :type distance_min: float
+    :type distance_max: float
 
-    Returns:
-        list[Location]: Filtered locations.
+    :return: Filtered locations.
+    :rtype: list[Location]
     """
     return [
         loc
@@ -320,22 +307,20 @@ def filter_distance(
     ]
 
 
-def filter_crosstrack_distance(
-    locations: list[Location],
-    start_path: Location,
-    end_path: Location,
-    distance_max: float
-) -> list[Location]:
+def filter_crosstrack_distance(locations, start_path, end_path, distance_max):
     """Filter location by distance to a great-circle path.
 
-    Args:
-        locations (list[Location]): Locations to filter.
-        start_path (Location): Start of the great circle path.
-        end_path (Location): End of the great circle path.
-        distance_max (float): Distance to the great-circle in [deg].
+    :param locations: Locations to filter.
+    :param start_path: Start of the great circle path.
+    :param end_path: End of the great circle path.
+    :param distance_max: Distance to the great-circle in [deg].
+    :type locations: list
+    :type start_path: Location
+    :type end_path: Location
+    :type distance_max: float
 
-    Returns:
-        list[Location]: Filtered locations.
+    :return: Filtered locations.
+    :rtype: list[Location]
     """
     return [
         loc
