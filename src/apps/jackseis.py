@@ -193,6 +193,14 @@ def main(args=None):
         help='downsample to RATE [Hz]')
 
     parser.add_option(
+        '--scale',
+        dest='scale',
+        type=float,
+        metavar='FACTOR',
+        help='scale seismograms with given FACTOR. Changes data type to '
+             'float64. Use --output-data-type to change again after scaling.')
+
+    parser.add_option(
         '--output',
         dest='output_path',
         metavar='TEMPLATE',
@@ -544,6 +552,10 @@ def main(args=None):
                             'Trace too short: %s' % '.'.join(tr.nslc_id))
 
                 traces = out_traces
+
+            if options.scale is not None:
+                for tr in traces:
+                    tr.ydata = options.scale * tr.ydata
 
             if options.output_data_type != 'same':
                 for tr in traces:
