@@ -267,15 +267,17 @@ def process_signature(app, what, name, obj, options, signature,
 
     from pyrocko import guts
 
-    # if what == 'attribute' and isinstance(obj, guts.TBase):
-    #     return (str(obj), '')
-
     if what == 'class' and issubclass(obj, guts.Object):
         if obj.dummy_for is not None:
-            return ('(dummy)', '%s' % (
-                obj.dummy_for_description
-                if hasattr(obj, 'dummy_for_description')
-                else obj.dummy_for.__name__))
+            cls_name = obj.T.classname
+            descr = obj.dummy_for.__name__
+            if hasattr(obj, 'dummy_for_descripton'):
+                descr = (
+                    obj.dummy_for_description
+                    if obj.dummy_for_description is not None
+                    else descr)
+            return ('(...)', 'dummy for %s' % (descr))
+
     return
 
 
