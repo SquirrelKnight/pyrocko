@@ -19,6 +19,7 @@ installed from source:
    * C compiler (tested with gcc, clang and MSVC)
    * ``patch`` utility
    * `NumPy <http://numpy.scipy.org/>`_ (>= 1.6, with development headers)
+   * `wheel <https://pypi.org/project/wheel/>`_
 
 * Try to use normal system packages for these Python modules:
    * `Python <http://www.python.org/>`_ (>= 3.5, with development headers)
@@ -46,9 +47,18 @@ installed from source:
 Download, compile and install Pyrocko from source
 -------------------------------------------------
 
-The following examples will install Pyrocko on Linux or MacOS. For Windows
-source installs, please refer to :ref:`Installation on Windows: From source
-<windows-install-from-source>`.
+The following examples will install Pyrocko from source, on Linux or MacOS.
+For Windows "from source" installs, please refer to :ref:`Installation on
+Windows: From source <windows-install-from-source>`.
+
+Because of the many different and conflicting ways how you can manage your
+Python installations, be sure to understand the basics of Python package
+management before proceeding.
+
+For your convenience, we are using Pyrocko's "from source" installation helper
+``install.py`` here. Run ``python install.py --help`` for more information. The
+native commands to be run are printed before execution, and have to be
+confirmed by you.
 
 .. highlight:: sh
 
@@ -59,29 +69,29 @@ source installs, please refer to :ref:`Installation on Windows: From source
 
 2. Change to the Pyrocko project directory::
 
-   cd ~/src/pyrocko/
+    cd ~/src/pyrocko/
 
 3. Install prerequisites using your method of choice::
 
-    # (a) If you manage your installations with the system's package manager:
-    python3 ./install_prerequisites.py
+    # (a) If you manage the prerequisites with the system's package manager:
+    python3 install.py deps system
 
-    # or (b), if you manage your installations with pip:
-    pip3 install -r requirements.txt
+    # or (b), if you manage the prerequisites with pip:
+    python3 install.py deps pip
 
-    # or (c), if you manage your installations with conda:
-    conda install --file requirements.txt
+    # or (c), if you manage your installation with conda:
+    python3 install.py deps conda
 
 4. Build and install Pyrocko::
 
-    # If you want to install for single user:
-    pip3 install --no-deps --no-build-isolation --force-reinstall .
+    # If you want to install for single user (pip, venv, conda):
+    python3 install.py user
 
     # or, if you want to install system wide:
-    sudo pip3 install --no-deps --no-build-isolation --force-reinstall .
+    python3 install.py system
 
-**Note:** If you do not specify `--no-deps`, pip will automatically download
-and install missing dependencies. Unless you manage your installations
+**Note:** With pip, if you do not specify `--no-deps`, it will automatically
+download and install missing dependencies. Unless you manage your installations
 exclusively with pip, omitting this flag can lead to conficts.
 
 **Note:** The intention of using `--no-build-isolation` is to compile exactly
