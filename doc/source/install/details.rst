@@ -92,7 +92,7 @@ confirmed by you.
 
 **Note:** With pip, if you do not specify `--no-deps`, it will automatically
 download and install missing dependencies. Unless you manage your installations
-exclusively with pip, omitting this flag can lead to conficts.
+exclusively with pip, omitting this flag can lead to conflicts.
 
 **Note:** The intention of using `--no-build-isolation` is to compile exactly
 against the already installed prerequisites. If you omit the flag, pip will
