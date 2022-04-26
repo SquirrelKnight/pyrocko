@@ -62,16 +62,16 @@ confirmed by you.
 
 .. highlight:: sh
 
-1. Download (clone) the Pyrocko project directory with *git*::
+**(A1)** Download (clone) the Pyrocko project directory with *git*::
 
     cd ~/src/   # or wherever you keep your source packages
     git clone https://git.pyrocko.org/pyrocko/pyrocko.git pyrocko
 
-2. Change to the Pyrocko project directory::
+**(A2)** Change to the Pyrocko project directory::
 
     cd ~/src/pyrocko/
 
-3. Install prerequisites using your method of choice::
+**(A3)** Install prerequisites using your method of choice::
 
     # (a) If you manage the prerequisites with the system's package manager:
     python3 install.py deps system
@@ -82,7 +82,7 @@ confirmed by you.
     # or (c), if you manage your installation with conda:
     python3 install.py deps conda
 
-4. Build and install Pyrocko::
+**(A4)** Build and install Pyrocko::
 
     # If you want to install for single user (pip, venv, conda):
     python3 install.py user
@@ -109,8 +109,10 @@ Update
 If you later would like to update Pyrocko, run the following commands (this
 assumes that you have used *git* to download Pyrocko).
 
-**Change to the Pyrocko project directory (step 2. above)**, then update it::
+**(B1)** **Change to the Pyrocko project directory (step A2. above)**
+
+**(B2)** Update the project directory tree with *git*::
 
     git pull origin master --ff-only
 
-**Then build and reinstall Pyrocko as descibed in step 4.**
+**(B3)** **Build and reinstall Pyrocko as described in step A4.**
