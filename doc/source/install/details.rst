@@ -109,7 +109,7 @@ Update
 If you later would like to update Pyrocko, run the following commands (this
 assumes that you have used *git* to download Pyrocko).
 
-Change to the Pyrocko project directory (step 2. above), then update it::
+**Change to the Pyrocko project directory (step 2. above)**, then update it::
 
     git pull origin master --ff-only
 
