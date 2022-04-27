@@ -56,7 +56,7 @@ Because of the many different and conflicting ways how you can manage your
 Python installations, be sure to understand the basics of Python package
 management before proceeding.
 
-For your convenience, we are using Pyrocko's "from source" installation helper
+For convenience, we are using Pyrocko's "from source" installation helper
 ``install.py`` here. Run ``python install.py --help`` for more information. The
 native commands to be run are printed before execution, and have to be
 confirmed by you.
@@ -74,7 +74,7 @@ confirmed by you.
 
 **(A3)** Install prerequisites using your method of choice::
 
-    # (a) If you manage the prerequisites with the system's package manager:
+    # (a) If you manage the prerequisites with the system's native package manager:
     python3 install.py deps system
 
     # or (b), if you manage the prerequisites with pip:
@@ -91,12 +91,12 @@ confirmed by you.
     # or, if you want to install system wide:
     python3 install.py system
 
-**Note:** With pip, if you do not specify ``--no-deps``, it will automatically
+**Note:** With *pip*, if you do not specify ``--no-deps``, it will automatically
 download and install missing dependencies. Unless you manage your installations
-exclusively with pip, omitting this flag can lead to conflicts.
+exclusively with *pip*, omitting this flag can lead to conflicts.
 
 **Note:** The intention of using ``--no-build-isolation`` is to compile exactly
-against the already installed prerequisites. If you omit the flag, pip will
+against the already installed prerequisites. If you omit the flag, *pip* will
 compile against possibly newer versions which it downloads and installs into a
 temporary, isolated environment.
 
@@ -116,12 +116,12 @@ assumes that you have used *git* to download Pyrocko).
 
     git pull origin master --ff-only
 
-**(B3)** **Build and reinstall Pyrocko as described (A4).**
+**(B3)** **Build and reinstall Pyrocko (A4).**
 
 Uninstalling
 ------------
 
-You can use pip to uninstall Pyrocko::
+You can use *pip* to uninstall Pyrocko::
 
     # (a) To remove a single user "from source" install (pip, venv, conda):
     pip uninstall pyrocko
