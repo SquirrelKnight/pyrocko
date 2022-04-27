@@ -8,6 +8,7 @@ needed when a standard install is not possible or conflicts arise.
 **For standard install instructions, head on over to**
 
 * :doc:`system/index`
+* :doc:`packages/index`
 
 Prerequisites
 -------------
