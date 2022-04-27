@@ -1,0 +1,14 @@
+m2-tar
+m2-gzip
+m2-patch
+setuptools
+wheel
+numpy>=1.8
+scipy
+pyyaml
+matplotlib
+progressbar2
+requests
+nose
+jinja2
+pybtex
