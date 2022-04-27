@@ -11,6 +11,10 @@ fi
 
 payload=`find wheels dist -name 'pyrocko-*'`
 
+echo "Stuff to upload:"
+echo "$payload"
+echo
+
 if [ "$destination" == 'live' ] ; then
     twine upload "$payload" \
         --username="$PYPI_USERNAME" --password="$PYPI_PASSWORD" \
