@@ -208,7 +208,7 @@ def cmd_deps_conda(parser, args):
     if platform.system().lower() == 'windows':
         requirements = 'requirements-conda-windows.txt'
     else:
-        requirements = 'requirements-all.txt'
+        requirements = 'requirements-conda.txt'
 
     do_command(
         ['conda', 'install', '--file', requirements],
