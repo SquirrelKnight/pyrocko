@@ -45,8 +45,8 @@ installed from source:
    * `QSSP <https://git.pyrocko.org/pyrocko/fomosto-qssp>`_ (optional, needed for the Fomosto ``qssp.2010`` backend)
    * `PSGRN/PSCMP <https://git.pyrocko.org/pyrocko/fomosto-psgrn-pscmp>`_ (optional, needed for the Fomosto ``psgrn.pscmp`` backend)
 
-Download, compile and install Pyrocko from source
--------------------------------------------------
+Download, build and install from source
+---------------------------------------
 
 The following examples will install Pyrocko from source, on Linux or MacOS.
 For Windows "from source" installs, please refer to :ref:`Installation on
@@ -91,11 +91,11 @@ confirmed by you.
     # or, if you want to install system wide:
     python3 install.py system
 
-**Note:** With pip, if you do not specify `--no-deps`, it will automatically
+**Note:** With pip, if you do not specify ``--no-deps``, it will automatically
 download and install missing dependencies. Unless you manage your installations
 exclusively with pip, omitting this flag can lead to conflicts.
 
-**Note:** The intention of using `--no-build-isolation` is to compile exactly
+**Note:** The intention of using ``--no-build-isolation`` is to compile exactly
 against the already installed prerequisites. If you omit the flag, pip will
 compile against possibly newer versions which it downloads and installs into a
 temporary, isolated environment.
@@ -104,16 +104,27 @@ temporary, isolated environment.
 *pip*, or *conda*, you should first remove the old installation. Otherwise you
 will end up with two parallel installations which will cause trouble.
 
-Update
-------
+Updating a "from source" install
+--------------------------------
 
 If you later would like to update Pyrocko, run the following commands (this
 assumes that you have used *git* to download Pyrocko).
 
-**(B1)** **Change to the Pyrocko project directory (step A2. above)**
+**(B1)** **Change to the Pyrocko project directory (A2).**
 
 **(B2)** Update the project directory tree with *git*::
 
     git pull origin master --ff-only
 
-**(B3)** **Build and reinstall Pyrocko as described in step A4.**
+**(B3)** **Build and reinstall Pyrocko as described (A4).**
+
+Uninstalling
+------------
+
+You can use pip to uninstall Pyrocko::
+
+    # (a) To remove a single user "from source" install (pip, venv, conda):
+    pip uninstall pyrocko
+
+    # (b) To remove a system-wide "from source" install:
+    sudo pip uninstall pyrocko

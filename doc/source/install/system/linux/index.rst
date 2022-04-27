@@ -2,8 +2,8 @@
 Installation under Linux
 ========================
 
-This section lists the commands needed to install Pyrocko and its prerequisites
-on most popular Linux distributions
+This section lists the commands to install Pyrocko and its prerequisites on
+most popular Linux distributions.
 
 System-wide installation from source
 ------------------------------------
@@ -32,8 +32,8 @@ User installation from source into isolated environment
     pip install --only-binary :all: PyQt5  # for Snuffler
 
 
-User installation from source using system packages to satisfy prerequisites
-----------------------------------------------------------------------------
+User installation from source using system packages for the prerequisites
+-------------------------------------------------------------------------
 
 .. code-block:: bash
     :caption: **Any Linux**
