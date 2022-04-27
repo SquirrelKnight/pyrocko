@@ -42,7 +42,7 @@ test:
   imports:
     - pyrocko
   commands:
-    - python -m pytest test
+    - python -m pytest test/base/test_util.py test/base/test_guts.py test/base/test_eikonal.py
 
 about:
   home: https://pyrocko.org
