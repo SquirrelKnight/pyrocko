@@ -204,8 +204,14 @@ def do_shell_script(fn, force=False, quiet=False):
 
 
 def cmd_deps_conda(parser, args):
+
+    if platform.system().lower() == 'windows':
+        requirements = 'requirements-conda-windows.txt'
+    else:
+        requirements = 'requirements-all.txt'
+
     do_command(
-        ['conda', 'install', '--file', 'requirements-all.txt'],
+        ['conda', 'install', '--file', requirements],
         force=args.yes, quiet=args.quiet)
 
 
