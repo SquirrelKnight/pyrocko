@@ -32,8 +32,8 @@ requirements:
     - jinja2
     - nose
 
-build:
-  script: {{PYTHON}} setup.py install
+#build:
+#  script: {{PYTHON}} setup.py install
 
 test:
   source_files:
