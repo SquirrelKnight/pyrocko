@@ -115,7 +115,7 @@ steps:
     - candidate
     - pip
   commands:
-  - maintenance/pip/upload_wheels.sh testing
+  - bash maintenance/pip/upload_wheels.sh testing
   environment:
     PYPI_USERNAME:
       from_secret: pypi-username
@@ -129,7 +129,7 @@ steps:
     branch:
     - release
   commands:
-  - maintenance/pip/upload_wheels.sh live
+  - bash maintenance/pip/upload_wheels.sh live
   environment:
     PYPI_USERNAME:
       from_secret: pypi-username
@@ -202,7 +202,7 @@ steps:
     - candidate
     - pip
   commands:
-  - maintenance/pip/upload_wheels.sh testing
+  - bash maintenance/pip/upload_wheels.sh testing
   environment:
     PYPI_USERNAME:
       from_secret: pypi-username
@@ -216,7 +216,7 @@ steps:
     branch:
     - release
   commands:
-  - maintenance/pip/upload_wheels.sh live
+  - bash maintenance/pip/upload_wheels.sh live
   environment:
     PYPI_USERNAME:
       from_secret: pypi-username
@@ -289,7 +289,7 @@ steps:
     - candidate
     - pip
   commands:
-  - maintenance/pip/upload_wheels.sh testing
+  - bash maintenance/pip/upload_wheels.sh testing
   environment:
     PYPI_USERNAME:
       from_secret: pypi-username
@@ -303,7 +303,7 @@ steps:
     branch:
     - release
   commands:
-  - maintenance/pip/upload_wheels.sh live
+  - bash maintenance/pip/upload_wheels.sh live
   environment:
     PYPI_USERNAME:
       from_secret: pypi-username
@@ -636,7 +636,7 @@ steps:
     - pip
   commands:
   - pip install twine
-  - bash maintenance/pip/upload_wheels_windows.sh testing
+  - bash maintenance/pip/upload_wheels.sh testing
   environment:
     PYPI_USERNAME:
       from_secret: pypi-username
@@ -650,7 +650,7 @@ steps:
     - pip-windows-release
   commands:
   - pip install twine
-  - bash maintenance/pip/upload_wheels_windows.sh live
+  - bash maintenance/pip/upload_wheels.sh live
   environment:
     PYPI_USERNAME:
       from_secret: pypi-username
