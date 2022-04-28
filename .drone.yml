@@ -164,8 +164,8 @@ steps:
       exclude:
       - release
   commands:
-  - pip3 install -f wheels pyrocko --no-index --no-deps
-  - pip3 install -f wheels pyrocko
+  - pip3 install -f dist pyrocko --no-index --no-deps
+  - pip3 install -f dist pyrocko
   - pip3 install --only-binary=PyQt5 PyQt5 jinja2 nose
   - xvfb-run -s '-screen 0 640x480x24' python3 -m nose test
 
@@ -178,14 +178,14 @@ steps:
       - release
   commands:
   - ln -sf /pyrocko-test-data test/data
-  - pip3 install -f wheels --no-index --no-deps pyrocko
+  - pip3 install -f dist --no-index --no-deps pyrocko
   - xvfb-run -s '-screen 0 640x480x24' python3 -m nose test
 
 - name: stage
   image: pyrocko-util
   pull: never
   commands:
-  - maintenance/drone-rsync.sh wheels/ ${DRONE_COMMIT}/wheels/
+  - maintenance/drone-rsync.sh dist/ ${DRONE_COMMIT}/wheels/
   environment:
     RSYNC_HOST:
       from_secret: rsync-host
@@ -251,8 +251,8 @@ steps:
       exclude:
       - release
   commands:
-  - pip3 install -f wheels pyrocko --no-index --no-deps
-  - pip3 install -f wheels pyrocko
+  - pip3 install -f dist pyrocko --no-index --no-deps
+  - pip3 install -f dist pyrocko
   - pip3 install --only-binary=PyQt5 PyQt5 jinja2 nose
   - xvfb-run -s '-screen 0 640x480x24' python3 -m nose test
 
@@ -265,14 +265,14 @@ steps:
       - release
   commands:
   - ln -sf /pyrocko-test-data test/data
-  - pip3 install -f wheels --no-index --no-deps pyrocko
+  - pip3 install -f dist --no-index --no-deps pyrocko
   - xvfb-run -s '-screen 0 640x480x24' python3 -m nose test
 
 - name: stage
   image: pyrocko-util
   pull: never
   commands:
-  - maintenance/drone-rsync.sh wheels/ ${DRONE_COMMIT}/wheels/
+  - maintenance/drone-rsync.sh dist/ ${DRONE_COMMIT}/wheels/
   environment:
     RSYNC_HOST:
       from_secret: rsync-host
