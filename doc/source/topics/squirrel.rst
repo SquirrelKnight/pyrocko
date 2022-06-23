@@ -249,6 +249,8 @@ For an additional speedup, the modification time checks can be disabled (Fig 9c)
 
     Figure 9b: Adding files with ``check=False``.
 
+Modified files will still be recognized and handled appropriately, but only
+later, during content access queries.
 
 Persistent selections
 .....................
@@ -269,8 +271,8 @@ indexed content but each application has its own live selection (Fig 10).
 
     Figure 10: Multiple applications using the same Squirrel environment.
 
-Selections can be made persistent and shared among multiple application using
-the same Squirrel environment (Fig 11):
+Selections can be made persistent and are shared among multiple applications
+using the same Squirrel environment (Fig 11):
 
 .. code-block:: python
 
