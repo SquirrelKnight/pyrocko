@@ -769,21 +769,21 @@ def time_tick_labels(tmin, tmax, tinc, tinc_unit):
         times = times.tolist()
 
         if tinc < 1e-6:
-            fmt = '%Y-%m-%d.%H:%M:%S.9FRAC'
+            fmt = '%Y-%m-%d %H:%M:%S.9FRAC'
         elif tinc < 1e-3:
-            fmt = '%Y-%m-%d.%H:%M:%S.6FRAC'
+            fmt = '%Y-%m-%d %H:%M:%S.6FRAC'
         elif tinc < 1.0:
-            fmt = '%Y-%m-%d.%H:%M:%S.3FRAC'
+            fmt = '%Y-%m-%d %H:%M:%S.3FRAC'
         elif tinc < 60:
-            fmt = '%Y-%m-%d.%H:%M:%S'
+            fmt = '%Y-%m-%d %H:%M:%S'
         elif tinc < 3600.*24:
-            fmt = '%Y-%m-%d.%H:%M'
+            fmt = '%Y-%m-%d %H:%M'
         else:
             fmt = '%Y-%m-%d'
 
-        nwords = len(fmt.split('.'))
+        nwords = len(fmt.replace(' ', '.').split('.'))
 
-        labels = [time_to_str(t, format=fmt) for t in times]
+        labels = [time_to_str(t, format=fmt).replace(' ', '.') for t in times]
         labels_weeded = []
         have_ymd = have_hms = False
         ymd = hms = ''
