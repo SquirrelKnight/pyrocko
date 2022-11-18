@@ -1622,7 +1622,7 @@ def time_to_str(t, format='%Y-%m-%d %H:%M:%S.3FRAC'):
         else:
             format = '%Y-%m-%d %H:%M:%S'
 
-    if util_ext is not None:
+    if False:  # util_ext is not None:
         t0 = num.floor(t)
         try:
             return util_ext.tts(int(t0), float(t - t0), format)
