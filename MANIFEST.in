@@ -5,4 +5,5 @@ recursive-include src/ext/pyavl-1.12 *
 include maintenance/readme-pip.rst
 include *.md *.tar.gz *.cfg *.patch
 global-exclude *.py[cod] __pycache__
+global-exclude test maintenance
 
