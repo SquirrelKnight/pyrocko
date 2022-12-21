@@ -5,23 +5,39 @@
 
 from __future__ import absolute_import, print_function
 
-import re
 import logging
 import os.path as op
+import re
 
 import numpy as num
 
 from pyrocko import io, trace, util
+from pyrocko.guts import (
+    Choice,
+    Defer,
+    Dict,
+    Float,
+    Int,
+    IntChoice,
+    List,
+    String,
+    StringChoice,
+    Timestamp,
+    clone,
+    load_all,
+)
+from pyrocko.has_paths import HasPaths, Path
 from pyrocko.progress import progress
-from pyrocko.has_paths import Path, HasPaths
-from pyrocko.guts import Dict, String, Choice, Float, List, Timestamp, \
-    StringChoice, IntChoice, Defer, load_all, clone
-from pyrocko.squirrel.dataset import Dataset
 from pyrocko.squirrel.client.local import LocalData
+from pyrocko.squirrel.dataset import Dataset
 from pyrocko.squirrel.error import ToolError
 from pyrocko.squirrel.model import CodesNSLCE
-from pyrocko.squirrel.operators.base import NetworkGrouping, StationGrouping, \
-    ChannelGrouping, SensorGrouping
+from pyrocko.squirrel.operators.base import (
+    ChannelGrouping,
+    NetworkGrouping,
+    SensorGrouping,
+    StationGrouping,
+)
 
 tts = util.time_to_str
 
@@ -107,11 +123,15 @@ class Converter(HasPaths):
         Choice.T([
             String.T(),
             Dict.T(String.T(), String.T())]))
+    rename_callback = String.T(optional=True)
     tmin = Timestamp.T(optional=True)
     tmax = Timestamp.T(optional=True)
     tinc = Float.T(optional=True)
 
     downsample = Float.T(optional=True)
+
+    in_min_file_size = Int.T(optional=True)
+    in_max_file_size = Int.T(optional=True)
 
     out_path = Path.T(optional=True)
     out_sds_path = Path.T(optional=True)
@@ -224,6 +244,43 @@ class Converter(HasPaths):
                  'Add outer loop with given GROUPING. Choices: %s'
                  % ', '.join(TraversalChoice.choices))
 
+        p.add_argument(
+            '--in-min-size',
+            dest='in_min_file_size',
+            metavar='BYTES',
+            type=int,
+            help="Minimum file size to read in bytes."
+        )
+
+        p.add_argument(
+            '--in-max-size',
+            dest='in_max_file_size',
+            metavar='BYTES',
+            type=int,
+            help="Maximum file size to read in bytes."
+        )
+
+        p.add_argument(
+            '--rename-callback',
+            dest='rename_callback',
+            metavar='MODULE_NAME',
+            type=str,
+            help='Callback for renaming a trace, give as module.name:func. '
+                 'Similar tp `python -m` syntax. '
+                 'Rename function takes a pyrocko.Trace object and modifies '
+                 'in-place.'
+
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._rename_callback = None
+        if self.rename_callback:
+            module_name, function_name = self.rename_callback.split(':')
+            rename_module = __import__(module_name)
+            self._rename_callback = rename_module.getattr(function_name)
+
     @classmethod
     def from_arguments(cls, args):
         kwargs = args.squirrel_query
@@ -233,12 +290,15 @@ class Converter(HasPaths):
             out_format=args.out_format,
             out_path=args.out_path,
             tinc=args.tinc,
+            in_min_file_size=args.in_min_file_size,
+            in_max_file_size=args.in_max_file_size,
             out_sds_path=args.out_sds_path,
             out_data_type=args.out_data_type,
             out_mseed_record_length=args.out_mseed_record_length,
             out_mseed_steim=args.out_mseed_steim,
             out_meta_path=args.out_meta_path,
             traversal=args.traversal,
+            rename_callback=args.rename_callback,
             **kwargs)
 
         obj.validate()
@@ -249,12 +309,18 @@ class Converter(HasPaths):
             sq.add_dataset(self.in_dataset)
 
         if self.in_path is not None:
-            ds = Dataset(sources=[LocalData(paths=[self.in_path])])
+            ds = Dataset(sources=[LocalData(
+                    paths=[self.in_path],
+                    min_file_size=self.in_min_file_size,
+                    max_file_size=self.in_max_file_size)])
             ds.set_basepath_from(self)
             sq.add_dataset(ds)
 
         if self.in_paths:
-            ds = Dataset(sources=[LocalData(paths=self.in_paths)])
+            ds = Dataset(sources=[LocalData(
+                    paths=self.in_paths,
+                    min_file_size=self.in_min_file_size,
+                    max_file_size=self.in_max_file_size)])
             ds.set_basepath_from(self)
             sq.add_dataset(ds)
 
@@ -308,6 +374,12 @@ class Converter(HasPaths):
             return self.expand_path(self.out_meta_path)
         else:
             return None
+
+    def do_rename_callback(self, tr):
+        if self._rename_callback is None:
+            return
+
+        self._rename_callback(tr)
 
     def do_rename(self, rules, tr):
         rename = {}
@@ -442,7 +514,10 @@ class Converter(HasPaths):
                     traces = out_traces
 
                 for tr in traces:
-                    self.do_rename(rename_rules, tr)
+                    if self._rename_callback:
+                        self.do_rename_callback(tr)
+                    else:
+                        self.do_rename(rename_rules, tr)
 
                 if out_data_type:
                     for tr in traces:
