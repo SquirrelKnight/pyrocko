@@ -378,8 +378,10 @@ class Converter(HasPaths):
     def do_rename_callback(self, tr):
         if self._rename_callback is None:
             return
-
-        self._rename_callback(tr)
+        try:
+            self._rename_callback(tr)
+        except Exception as exc:
+            logger.error("Rename callback failed", exc_info=exc)
 
     def do_rename(self, rules, tr):
         rename = {}
