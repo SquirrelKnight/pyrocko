@@ -5,7 +5,10 @@
 
 from __future__ import absolute_import, print_function
 
+import importlib
+import importlib.util
 import logging
+import os
 import os.path as op
 import re
 
@@ -278,8 +281,20 @@ class Converter(HasPaths):
         self._rename_callback = None
         if self.rename_callback:
             module_name, function_name = self.rename_callback.split(':')
-            rename_module = __import__(module_name)
-            self._rename_callback = rename_module.getattr(function_name)
+
+            try:
+                rename_module = importlib.import_module(module_name)
+            except ModuleNotFoundError as exc:
+                spec = importlib.util.spec_from_file_location(
+                    module_name, op.join(os.getcwd(), module_name + ".py"))
+                if spec is None:
+                    raise exc
+                rename_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(rename_module)
+            except Exception as exc:
+                raise exc
+
+            self._rename_callback = getattr(rename_module, function_name)
 
     @classmethod
     def from_arguments(cls, args):
@@ -516,10 +531,8 @@ class Converter(HasPaths):
                     traces = out_traces
 
                 for tr in traces:
-                    if self._rename_callback:
-                        self.do_rename_callback(tr)
-                    else:
-                        self.do_rename(rename_rules, tr)
+                    self.do_rename(rename_rules, tr)
+                    chain.fcall("do_rename_callback", tr)
 
                 if out_data_type:
                     for tr in traces:
