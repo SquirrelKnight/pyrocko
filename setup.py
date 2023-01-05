@@ -431,6 +431,9 @@ subpacknames = [
     'pyrocko.squirrel.tool',
     'pyrocko.squirrel.tool.commands',
     'pyrocko.squirrel.operators',
+    'pyrocko.gato',
+    'pyrocko.gato.grid',
+    'pyrocko.gato.delays',
 ]
 
 cmdclass = {
